@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { clearDisplay, drawPattern, drawPixel, drawLine } from '@/app/actions';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button';
+import { Pixoo } from '@pixoo-ts/core';
 
 const SCALE = 8; // Each pixel will be 8x8
+const pixoo = new Pixoo({ ipAddress: null });
+const DISPLAY_SIZE = pixoo.displaySize;
 
 export function PixooSimulator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,8 +26,8 @@ export function PixooSimulator() {
     if (!ctx) return;
 
     // Create ImageData for the display
-    const imageData = ctx.createImageData(64, 64);
-    for (let i = 0; i < 64 * 64; i++) {
+    const imageData = ctx.createImageData(DISPLAY_SIZE, DISPLAY_SIZE);
+    for (let i = 0; i < DISPLAY_SIZE * DISPLAY_SIZE; i++) {
       const offset = i * 4;
       const bOff = i * 3;
       imageData.data[offset] = buffer[bOff] ?? 0; // R
@@ -39,13 +42,23 @@ export function PixooSimulator() {
 
     // Create a temporary canvas for scaling
     const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = 64;
-    tempCanvas.height = 64;
+    tempCanvas.width = DISPLAY_SIZE;
+    tempCanvas.height = DISPLAY_SIZE;
     const tempCtx = tempCanvas.getContext('2d');
     if (!tempCtx) return;
 
     tempCtx.putImageData(imageData, 0, 0);
-    ctx.drawImage(tempCanvas, 0, 0, 64, 64, 0, 0, 64 * SCALE, 64 * SCALE);
+    ctx.drawImage(
+      tempCanvas,
+      0,
+      0,
+      DISPLAY_SIZE,
+      DISPLAY_SIZE,
+      0,
+      0,
+      DISPLAY_SIZE * SCALE,
+      DISPLAY_SIZE * SCALE
+    );
   }, [buffer]);
 
   const handleCanvasClick = async (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -53,8 +66,12 @@ export function PixooSimulator() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = Math.floor(((e.clientX - rect.left) / canvas.clientWidth) * 64);
-    const y = Math.floor(((e.clientY - rect.top) / canvas.clientHeight) * 64);
+    const x = Math.floor(
+      ((e.clientX - rect.left) / canvas.clientWidth) * DISPLAY_SIZE
+    );
+    const y = Math.floor(
+      ((e.clientY - rect.top) / canvas.clientHeight) * DISPLAY_SIZE
+    );
 
     if (!isDrawing) {
       setIsDrawing(true);
@@ -84,8 +101,12 @@ export function PixooSimulator() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = Math.floor(((e.clientX - rect.left) / canvas.clientWidth) * 64);
-    const y = Math.floor(((e.clientY - rect.top) / canvas.clientHeight) * 64);
+    const x = Math.floor(
+      ((e.clientX - rect.left) / canvas.clientWidth) * DISPLAY_SIZE
+    );
+    const y = Math.floor(
+      ((e.clientY - rect.top) / canvas.clientHeight) * DISPLAY_SIZE
+    );
 
     const newBuffer = await drawPixel(x, y, [255, 255, 255]);
     setBuffer(newBuffer);
@@ -106,8 +127,8 @@ export function PixooSimulator() {
     <div className="flex flex-col items-center gap-4">
       <canvas
         ref={canvasRef}
-        width={64 * SCALE}
-        height={64 * SCALE}
+        width={DISPLAY_SIZE * SCALE}
+        height={DISPLAY_SIZE * SCALE}
         className="border border-gray-500 cursor-crosshair"
         onClick={handleCanvasClick}
         onMouseMove={handleCanvasMouseMove}

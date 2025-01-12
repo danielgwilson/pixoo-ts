@@ -1,8 +1,10 @@
+// Server-only functionality - do not import in browser
 import express, { Request, Response, Express } from 'express';
 import { Pixoo } from './pixoo';
 
 /**
  * Provide an Express-based REST interface to a Pixoo device.
+ * This class should only be used in Node.js environments.
  */
 export class PixooServer {
   private pixoo: Pixoo;

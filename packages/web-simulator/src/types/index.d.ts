@@ -10,6 +10,8 @@ declare module '@pixoo-ts/core' {
     refreshCounterLimit?: number;
   }
 
+  export type PixooSize = 16 | 32 | 64;
+
   export class Pixoo {
     constructor(options: PixooOptions);
     clear(rgb?: [number, number, number]): void;
@@ -24,5 +26,7 @@ declare module '@pixoo-ts/core' {
     push(): Promise<void>;
     setBrightness(brightness: number): Promise<void>;
     setScreen(on: boolean): Promise<void>;
+    get displaySize(): PixooSize;
+    get bufferState(): number[];
   }
 }

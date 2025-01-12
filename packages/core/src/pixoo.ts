@@ -54,6 +54,21 @@ export class Pixoo {
     this.buffer = new Array(this.pixelCount * 3).fill(0);
   }
 
+  /**
+   * Get the current display size (16, 32, or 64)
+   */
+  public get displaySize(): PixooSize {
+    return this.size;
+  }
+
+  /**
+   * Get a copy of the current buffer state.
+   * Returns a new array to prevent external mutation.
+   */
+  public get bufferState(): number[] {
+    return [...this.buffer];
+  }
+
   private log(message: string, ...args: unknown[]): void {
     if (this.debug) {
       console.log(`[Pixoo] ${message}`, ...args);

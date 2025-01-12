@@ -21,8 +21,14 @@ const nextConfig = {
         timers: false,
         destroy: false,
         send: false,
-        express: false,
       };
+
+      // Exclude server-only modules from client bundle
+      config.module.rules.push({
+        test: /server\.(ts|js|mjs)$/,
+        include: /[\\/]@pixoo-ts[\\/]core[\\/]/,
+        use: 'null-loader',
+      });
     }
     return config;
   },
