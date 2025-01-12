@@ -7,7 +7,7 @@ export const getPixoo = async (): Promise<Pixoo> => {
   if (!pixooInstance) {
     const config = await getConfig();
     pixooInstance = new Pixoo({
-      ipAddress: config.ipAddress,
+      ipAddress: config.ipAddress === 'null' ? null : config.ipAddress,
       size: config.size ?? 64,
       debug: config.debug ?? false,
     });

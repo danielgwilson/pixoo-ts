@@ -12,30 +12,29 @@ const program = new Command()
   .version(version);
 
 // Add commands
-program
-  .command('draw')
-  .description('Draw on the Pixoo display')
-  .addCommand(drawCommand);
-
-program
-  .command('config')
-  .description('Configure Pixoo settings')
-  .addCommand(configCommand);
-
-program
-  .command('device')
-  .description('Control device settings')
-  .addCommand(deviceCommand);
+program.addCommand(drawCommand);
+program.addCommand(configCommand);
+program.addCommand(deviceCommand);
 
 // Error handling
 program.showHelpAfterError();
 program.showSuggestionAfterError();
 
 program.configureOutput({
-  writeOut: (str) => process.stdout.write(`${str}\n`),
-  writeErr: (str) => process.stdout.write(`${pc.red(str)}\n`),
-  outputError: (str, write) => write(pc.red(str)),
+  writeOut: (str: string) => process.stdout.write(`${str}\n`),
+  writeErr: (str: string) => process.stdout.write(`${pc.red(str)}\n`),
+  outputError: (str: string, write: (str: string) => void) =>
+    write(pc.red(str)),
 });
 
 // Parse and execute
-await program.parseAsync();
+const run = async () => {
+  try {
+    await program.parseAsync();
+  } catch (error) {
+    console.error(pc.red('Error:'), error);
+    process.exit(1);
+  }
+};
+
+run();

@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 
 const configSchema = z.object({
-  ipAddress: z.string().ip(),
+  ipAddress: z.union([z.string().ip(), z.literal('null')]),
   size: z.number().min(16).max(64).optional(),
   debug: z.boolean().optional(),
 });
@@ -24,15 +24,20 @@ export const getConfig = async (): Promise<Config> => {
         'No configuration found. Run `pixoo config init` to create one.'
       );
     }
+    console.error('Error reading config:', error);
     throw error;
   }
 };
 
 export const saveConfig = async (config: Config): Promise<void> => {
   try {
+    console.log('Saving config:', config);
     const validConfig = configSchema.parse(config);
+    console.log('Validated config:', validConfig);
     await fs.writeFile(CONFIG_PATH, JSON.stringify(validConfig, null, 2));
+    console.log('Config saved to:', CONFIG_PATH);
   } catch (error) {
+    console.error('Error saving config:', error);
     throw error;
   }
 };

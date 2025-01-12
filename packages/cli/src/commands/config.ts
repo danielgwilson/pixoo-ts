@@ -6,7 +6,10 @@ import { handleError } from '../utils/error.js';
 
 const setCommand = new Command('set')
   .description('Set configuration values')
-  .option('-i, --ip <address>', 'IP address of the Pixoo device')
+  .option(
+    '-i, --ip <address>',
+    'IP address of the Pixoo device (or "null" for simulation)'
+  )
   .option('-s, --size <size>', 'Display size (64)')
   .option('-d, --debug', 'Enable debug mode')
   .action(async (options) => {
@@ -14,7 +17,8 @@ const setCommand = new Command('set')
       const config = await getConfig();
 
       if (options.ip) {
-        config.ipAddress = z.string().ip().parse(options.ip);
+        config.ipAddress =
+          options.ip === 'null' ? 'null' : z.string().ip().parse(options.ip);
       }
 
       if (options.size) {
@@ -50,13 +54,15 @@ const initCommand = new Command('init')
         {
           type: 'input',
           name: 'ipAddress',
-          message: 'Enter the IP address of your Pixoo device:',
+          message:
+            'Enter the IP address of your Pixoo device (or "null" for simulation):',
           validate: (input) => {
+            if (input === 'null') return true;
             try {
               z.string().ip().parse(input);
               return true;
             } catch {
-              return 'Please enter a valid IP address';
+              return 'Please enter a valid IP address or "null" for simulation';
             }
           },
         },
