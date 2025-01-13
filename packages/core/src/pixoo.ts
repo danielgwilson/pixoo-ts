@@ -20,6 +20,7 @@ const DEFAULT_OPTIONS: Required<Omit<PixooOptions, 'ipAddress'>> = {
   debug: false,
   refreshConnectionAutomatically: true,
   refreshCounterLimit: 32,
+  isSimulator: false,
 };
 
 export class Pixoo {
@@ -29,13 +30,13 @@ export class Pixoo {
   private readonly refreshConnectionAutomatically: boolean;
   private readonly refreshCounterLimit: number;
   private readonly baseURL: string;
-  private readonly buffer: number[];
+  private buffer: number[];
   private readonly pixelCount: number;
   private counter: number = 1;
   private readonly isSimulation: boolean;
 
   constructor(options: PixooOptions) {
-    const { ipAddress, ...rest } = options;
+    const { ipAddress, isSimulator, ...rest } = options;
     const config = { ...DEFAULT_OPTIONS, ...rest };
 
     this.ipAddress = ipAddress;
@@ -43,15 +44,27 @@ export class Pixoo {
     this.debug = config.debug;
     this.refreshConnectionAutomatically = config.refreshConnectionAutomatically;
     this.refreshCounterLimit = config.refreshCounterLimit;
-    this.isSimulation = ipAddress === null;
+    this.isSimulation = isSimulator ?? ipAddress === null;
 
-    if (ipAddress && !isValidIpAddress(ipAddress)) {
+    if (ipAddress && !isSimulator && !isValidIpAddress(ipAddress)) {
       throw new Error(`Invalid IP address: ${ipAddress}`);
     }
 
-    this.baseURL = `http://${ipAddress ?? '0.0.0.0'}/post`;
+    this.baseURL = isSimulator
+      ? `http://${ipAddress}/api/draw`
+      : `http://${ipAddress ?? '0.0.0.0'}/post`;
     this.pixelCount = this.size * this.size;
     this.buffer = new Array(this.pixelCount * 3).fill(0);
+
+    if (this.debug) {
+      console.log(`[Pixoo] Initialized with options:`, {
+        ipAddress,
+        isSimulator,
+        size: this.size,
+        isSimulation: this.isSimulation,
+        baseURL: this.baseURL,
+      });
+    }
   }
 
   /**
@@ -69,6 +82,20 @@ export class Pixoo {
     return [...this.buffer];
   }
 
+  /**
+   * Update the buffer directly (used by simulator)
+   */
+  public updateBuffer(newBuffer: number[]): void {
+    if (newBuffer.length !== this.buffer.length) {
+      this.log(
+        `Invalid buffer length: ${newBuffer.length}, expected ${this.buffer.length}`
+      );
+      return;
+    }
+    this.buffer = [...newBuffer];
+    this.log('Buffer updated');
+  }
+
   private log(message: string, ...args: unknown[]): void {
     if (this.debug) {
       console.log(`[Pixoo] ${message}`, ...args);
@@ -78,12 +105,18 @@ export class Pixoo {
   private async sendCommand(
     payload: PixooPayload
   ): Promise<PixooResponse | undefined> {
-    if (this.isSimulation) {
-      // In simulation mode, just return a success response
-      return { error_code: 0 };
-    }
-
     try {
+      if (this.isSimulation) {
+        // In simulation mode, send the buffer directly
+        this.log('Sending buffer to simulator', this.buffer.slice(0, 10));
+        const response = await axios.post<PixooResponse>(this.baseURL, {
+          buffer: this.buffer,
+        });
+        return response.data;
+      }
+
+      // In real device mode, send the standard payload
+      this.log('Sending command to device', payload);
       const response = await axios.post<PixooResponse>(this.baseURL, payload);
       return response.data;
     } catch (error) {
@@ -102,6 +135,7 @@ export class Pixoo {
       this.buffer[offset + 1] = g;
       this.buffer[offset + 2] = b;
     }
+    this.log(`Cleared to RGB(${r}, ${g}, ${b})`);
   }
 
   public drawPixel(x: number, y: number, rgb: RGB): void {
@@ -116,6 +150,7 @@ export class Pixoo {
     this.buffer[offset] = r;
     this.buffer[offset + 1] = g;
     this.buffer[offset + 2] = b;
+    this.log(`Drew pixel at (${x}, ${y}) with RGB(${r}, ${g}, ${b})`);
   }
 
   public drawLine(

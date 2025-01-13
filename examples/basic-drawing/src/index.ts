@@ -64,7 +64,7 @@ async function runDrawingDemo(pixoo: Pixoo) {
   console.log(pc.green('✨ Demo complete!'));
 }
 
-async function startWebSimulator() {
+async function startWebSimulator(): Promise<Pixoo> {
   console.log(pc.blue('🌐 Starting web simulator...'));
 
   const webSimulatorPath = join(__dirname, '../../../packages/web-simulator');
@@ -85,11 +85,21 @@ async function startWebSimulator() {
     });
   });
 
+  // Give the server a moment to fully initialize
+  await new Promise((r) => setTimeout(r, 1000));
+
   await open('http://localhost:3000');
   console.log(pc.green('✨ Web simulator is running at http://localhost:3000'));
 
-  // Keep the process running
-  await new Promise(() => {});
+  // Create a simulated Pixoo instance
+  const pixoo = new Pixoo({
+    ipAddress: 'localhost:3000',
+    size: 64,
+    debug: false,
+    isSimulator: true,
+  });
+
+  return pixoo;
 }
 
 async function main() {
@@ -105,9 +115,11 @@ async function main() {
     },
   ]);
 
+  let pixoo: Pixoo;
+
   if (mode === 'real') {
     console.log(pc.blue('🔍 Finding Pixoo device...'));
-    const discovery = new PixooDiscovery({ debug: true });
+    const discovery = new PixooDiscovery({ debug: false });
     const ip = await discovery.findDevice();
 
     if (!ip) {
@@ -117,15 +129,21 @@ async function main() {
 
     console.log(pc.green(`✅ Found Pixoo at ${ip}`));
 
-    const pixoo = new Pixoo({
+    pixoo = new Pixoo({
       ipAddress: ip,
       size: 64,
-      debug: true,
+      debug: false,
     });
-
-    await runDrawingDemo(pixoo);
   } else {
-    await startWebSimulator();
+    pixoo = await startWebSimulator();
+  }
+
+  // Run the same drawing demo regardless of mode
+  await runDrawingDemo(pixoo);
+
+  // Keep the process running in simulator mode
+  if (mode === 'web') {
+    await new Promise(() => {});
   }
 }
 

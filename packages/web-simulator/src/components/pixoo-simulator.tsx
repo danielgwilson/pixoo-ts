@@ -8,6 +8,7 @@ import { Pixoo } from '@pixoo-ts/core';
 const SCALE = 8; // Each pixel will be 8x8
 const pixoo = new Pixoo({ ipAddress: null });
 const DISPLAY_SIZE = pixoo.displaySize;
+const POLL_INTERVAL = 50; // Poll every 50ms
 
 export function PixooSimulator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,6 +17,24 @@ export function PixooSimulator() {
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(
     null
   );
+
+  // Poll for buffer updates
+  useEffect(() => {
+    const pollBuffer = async () => {
+      try {
+        const response = await fetch('/api/draw/buffer');
+        if (response.ok) {
+          const data = await response.json();
+          setBuffer(data.buffer);
+        }
+      } catch (error) {
+        console.error('Error polling buffer:', error);
+      }
+    };
+
+    const interval = setInterval(pollBuffer, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
   // Draw the buffer to canvas whenever it changes
   useEffect(() => {

@@ -13,6 +13,7 @@ export interface PixooOptions {
   debug?: boolean;
   refreshConnectionAutomatically?: boolean;
   refreshCounterLimit?: number;
+  isSimulator?: boolean;
 }
 
 export interface PixooResponse {
