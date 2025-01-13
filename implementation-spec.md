@@ -104,13 +104,11 @@ Below are **representative** code samples from the various parts.
 
 ---
 
-# 1) **Core Library** (`packages/core`)
+## 1) **Core Library** (`packages/core`)
 
 ### `package.json` (excerpt)
 
-```
-jsonc
-Copy code
+```json
 {
   "name": "@pixoo64/core",
   "version": "0.1.0",
@@ -134,9 +132,7 @@ Copy code
 
 ### `tsconfig.json` (excerpt)
 
-```
-jsonc
-Copy code
+```json
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -155,9 +151,7 @@ Copy code
 
 ### `src/index.ts`
 
-```
-ts
-Copy code
+```ts
 export * from "./pixoo";
 export * from "./rest";
 export * from "./utils";
@@ -169,9 +163,7 @@ export * from "./utils";
 
 This is a rough translation of your Python `Pixoo` class to TypeScript. We omit the old Python simulator logic, since we’ll rely on a new web-simulator approach. The design also attempts to follow typical Node/TypeScript patterns.
 
-```
-ts
-Copy code
+```ts
 import axios from "axios";
 import { clampColor, rgbToHex, clamp, lerpLocation, roundLocation, minSteps } from "./utils";
 
@@ -373,9 +365,7 @@ export class Pixoo {
 
 In Python, you had `PixooREST` using **Flask** to run a local server. Below is a simplified approach using **Express** in Node. You can easily incorporate this in your CLI or runner if you like.
 
-```
-ts
-Copy code
+```ts
 import express, { Request, Response } from "express";
 import { Pixoo } from "./pixoo";
 
@@ -422,9 +412,7 @@ export class PixooREST {
 
 A place for clamp, color conversions, and other small utility functions. Many are direct translations from your Python code.
 
-```
-ts
-Copy code
+```ts
 export function clamp(value: number, minVal: number, maxVal: number): number {
   return Math.max(minVal, Math.min(value, maxVal));
 }
@@ -472,9 +460,7 @@ export function roundLocation([x, y]: [number, number]): [number, number] {
 
 ### A Sample Test: `test/pixoo.test.ts` using **Vitest**
 
-```
-ts
-Copy code
+```ts
 import { describe, it, expect } from "vitest";
 import { Pixoo } from "../src/pixoo";
 
@@ -501,15 +487,13 @@ describe("Pixoo Class", () => {
 
 ---
 
-# 2) **CLI Tool** (`packages/cli`)
+## 2) **CLI Tool** (`packages/cli`)
 
-### `src/index.ts`
+### `src/index.ts` (1)
 
 A small script that can create new projects or interact with an existing Pixoo device.
 
-```
-ts
-Copy code
+```ts
 #!/usr/bin/env node
 
 import { program } from "commander";
@@ -542,11 +526,9 @@ program.parse(process.argv);
 
 ```
 
-### `package.json` (excerpt)
+### `package.json` (excerpt) (1)
 
-```
-jsonc
-Copy code
+```json
 {
   "name": "@pixoo64/cli",
   "version": "0.1.0",
@@ -568,15 +550,13 @@ Then you might have a small bundling step or just run `tsc` and produce a `bin/p
 
 ---
 
-# 3) **Runner** (`packages/runner`)
+## 3) **Runner** (`packages/runner`)
 
 A minimal “headless” Node-based script that can be used to run a Pixoo project’s logic. This is **different** from the CLI, in that the CLI is a tool for scaffolding and quick device commands, while the runner might run your custom code that draws animations, etc.
 
-### `src/index.ts`
+### `src/index.ts` (2)
 
-```
-ts
-Copy code
+```ts
 import { Pixoo } from "@pixoo64/core";
 
 async function main() {
@@ -602,15 +582,13 @@ main().catch((err) => {
 
 ---
 
-# 4) **Web Simulator** (`packages/web-simulator`)
+## 4) **Web Simulator** (`packages/web-simulator`)
 
 Below is a minimal example of a **Vite + React** project that uses **TailwindCSS** and **Shadcn UI**. We’ll skip some boilerplate but show key components.
 
-### `package.json` (excerpt)
+### `package.json` (excerpt) (2)
 
-```
-jsonc
-Copy code
+```json
 {
   "name": "@pixoo64/web-simulator",
   "version": "0.1.0",
@@ -637,9 +615,7 @@ Copy code
 
 ### `vite.config.ts`
 
-```
-ts
-Copy code
+```ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -651,9 +627,7 @@ export default defineConfig({
 
 ### `tailwind.config.js`
 
-```
-js
-Copy code
+```js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [

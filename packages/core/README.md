@@ -44,6 +44,7 @@ await pixoo.setScreen(true)               // Turn the screen on
 Creates a new Pixoo instance.
 
 Options:
+
 - `ipAddress`: The IP address of your Pixoo device (required)
 - `size`: Display size (16, 32, or 64, default: 64)
 - `debug`: Enable debug logging (default: false)
@@ -95,4 +96,4 @@ pnpm test:watch
 
 ## License
 
-MIT 
+MIT

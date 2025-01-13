@@ -1,4 +1,3 @@
-// Core functionality (client-safe)
-export * from './pixoo';
 export * from './types';
-export * from './discovery';
+export * from './pixoo';
+export { PixooDiscovery } from './discovery';

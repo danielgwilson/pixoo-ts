@@ -2,6 +2,11 @@ import { networkInterfaces } from 'os';
 import axios from 'axios';
 import { EventEmitter } from 'events';
 
+interface NetworkDevice {
+  ip: string;
+  isPixoo: boolean;
+}
+
 export interface DiscoveryEvents {
   'device:found': (ip: string) => void;
   'subnet:start': (subnet: string) => void;
@@ -138,6 +143,25 @@ export class PixooDiscovery extends EventEmitter {
     return false;
   }
 
+  private async scanSubnet(subnet: string): Promise<NetworkDevice[]> {
+    const devices: NetworkDevice[] = [];
+    const promises: Promise<void>[] = [];
+
+    for (let i = 1; i < 255; i++) {
+      const ip = `${subnet}.${i}`;
+      promises.push(
+        this.isPixooDevice(ip).then((isPixoo) => {
+          if (isPixoo) {
+            devices.push({ ip, isPixoo });
+          }
+        })
+      );
+    }
+
+    await Promise.all(promises);
+    return devices;
+  }
+
   /**
    * Find Pixoo devices in the network
    */
@@ -205,8 +229,22 @@ export class PixooDiscovery extends EventEmitter {
    * Returns the first device found or null if none found
    */
   public async findDevice(): Promise<string | null> {
-    const devices = await this.findDevices();
-    return devices[0] ?? null;
+    const subnets = await this.getLocalSubnets();
+    this.log(`Will scan the following subnets: ${subnets.join(', ')}`);
+
+    for (const subnet of subnets) {
+      this.log(`Scanning subnet: ${subnet}.*`);
+      const devices = await this.scanSubnet(subnet);
+
+      // Return first device found instead of continuing to scan
+      if (devices.length > 0) {
+        const ip = devices[0].ip;
+        this.log(`Found Pixoo device at: ${ip}`);
+        return ip;
+      }
+    }
+
+    return null;
   }
 }
 
