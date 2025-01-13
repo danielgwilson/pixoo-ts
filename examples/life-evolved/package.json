@@ -1,0 +1,23 @@
+{
+  "name": "@pixoo-ts/example-life-evolved",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@pixoo-ts/core": "workspace:*",
+    "inquirer": "^9.2.12",
+    "open": "^10.0.3",
+    "picocolors": "^1.0.0",
+    "canvas": "^2.11.2"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
