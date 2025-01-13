@@ -5,6 +5,7 @@ import { version } from '../package.json';
 import { drawCommand } from './commands/draw.js';
 import { configCommand } from './commands/config.js';
 import { deviceCommand } from './commands/device.js';
+import { discoveryCommand } from './commands/discovery.js';
 
 const program = new Command()
   .name('pixoo')
@@ -15,6 +16,7 @@ const program = new Command()
 program.addCommand(drawCommand);
 program.addCommand(configCommand);
 program.addCommand(deviceCommand);
+program.addCommand(discoveryCommand);
 
 // Error handling
 program.showHelpAfterError();
